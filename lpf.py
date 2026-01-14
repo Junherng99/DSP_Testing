@@ -29,12 +29,11 @@ print(len(h))
 #print(f'{{{", ".join(map(str,h))}}}')
 print(f'{{{", ".join(f"{x:.20f}" for x in h)}}}')
 
-w, H = signal.freqz(h, worN = fS)
-f = w * fS / (2 * np.pi)
+w, H = signal.freqz(h, worN = fS, fs=fS)
 
 # Plot the frequency response
 plt.figure(figsize=(10, 6))
-plt.plot(f, 20* np.log10(abs(H)))
+plt.plot(w, 20* np.log10(abs(H)))
 plt.xlim(0,1500000)
 plt.ylim(-25,0)
 plt.title('Filter Frequency Response')

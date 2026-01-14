@@ -2,6 +2,7 @@ import numpy as np
 import scipy.signal as signal
 import sys
 from scipy.fft import fft, fftfreq, fftshift
+import matplotlib.pyplot as plt
 
 # def design_fir_lowpass(fS, fL, N):
 #     #Compute sinc filter.
@@ -39,14 +40,13 @@ def design_fir_lowpass(fS, fL, N):
 # ===============================
 
 ## Add 2 signals
-def generate_test_signal_add(f1,f2,duration,fS):
-    """
-    Generates a signal with:
-        - 50 kHz  (should pass)
-        - 200 kHz (should be attenuated)
-        - noise
-    """
-    time_int = 1/(fS) #30 points per oscillation. Based on higher frequency.
+def generate_test_signal_add(f1,f2,duration):
+    '''
+    Generates a sine signal that adds f1 and f2.
+    '''
+
+
+    time_int = 1/(30*max(f1,f2)) #30 points per oscillation. Based on higher frequency.
     t = np.arange(0, duration, time_int)
 
     x  = np.sin(2*np.pi*f1*t)    # in-band
@@ -57,18 +57,15 @@ def generate_test_signal_add(f1,f2,duration,fS):
     return t, x
 
 
-def generate_test_signal_mult(f1,f2,duration,fS):
+def generate_test_signal_mult(f1,f2,duration):
     """
-    Generates a signal with:
-      - 50 kHz  (should pass)
-      - 200 kHz (should be attenuated)
-      - noise
+    Generates a signal that multiplies 2 sines.
+    Note that multiplication of a signal causes 2 new frequencies. i.e. sin(x)sin(y) = (1/2)[cos(x-y)-cos(x+y)]
     """
-    time_int = 1/(fS) #30 points per oscillation. Based on higher frequency.
+    time_int = 1/(30*max(f1,f2)) #30 points per oscillation. Based on higher frequency.
     t = np.arange(0, duration, time_int)
 
-    x  = np.sin(2*np.pi*f1*t)    # in-band
-    x *= np.sin(2*np.pi*f2*t)   # out-of-band
+    x  = np.sin(2*np.pi*f1*t)*np.sin(2*np.pi*f2*t)     # in-band
     #x += 0.2 * np.random.randn(len(t))    # noise
 
     return t, x
@@ -99,18 +96,18 @@ def fir_filter(x, h):
     return y
 
 
-# ===============================
-# FFT utility
-# ===============================
-
-def compute_fft(x,Runtime,fS):
-    T = Runtime/fS
-    X = fft(x)
-    f = fftfreq(len(x), T)
-    f = fftshift(f)
-    X = fftshift(X)
-    return f, np.abs(X)
-
+def plot_LPF_freq_response(upper_Freq,fS,h):
+    # Plot the frequency response
+    w, H = signal.freqz(h, worN = fS, fs=fS)
+    plt.figure(figsize=(10, 6))
+    plt.plot(w, 20* np.log10(abs(H)))
+    plt.xlim(0,upper_Freq)
+    plt.ylim(-25,0)
+    plt.title('Filter Frequency Response')
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Amplitude (dB)')
+    plt.grid(True)
+    plt.show()
 
 
 # Print coefficients in your Verilog-friendly format
