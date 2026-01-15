@@ -27,7 +27,6 @@ import matplotlib.pyplot as plt
 
 def design_fir_lowpass(fS, fL, N):
     #Compute sinc filter.
-
     h = signal.firwin(N,fL,width=None,window='hamming',fs=fS)
 
     return h
@@ -40,13 +39,13 @@ def design_fir_lowpass(fS, fL, N):
 # ===============================
 
 ## Add 2 signals
-def generate_test_signal_add(f1,f2,duration):
+def generate_test_signal_add(f1,f2,duration,fS):
     '''
     Generates a sine signal that adds f1 and f2.
     '''
 
 
-    time_int = 1/(30*max(f1,f2)) #30 points per oscillation. Based on higher frequency.
+    time_int = 1/(fS) #30 points per oscillation. Based on higher frequency.
     t = np.arange(0, duration, time_int)
 
     x  = np.sin(2*np.pi*f1*t)    # in-band
@@ -57,18 +56,33 @@ def generate_test_signal_add(f1,f2,duration):
     return t, x
 
 
-def generate_test_signal_mult(f1,f2,duration):
+def generate_test_signal_mult(f1,f2,duration,fS):
     """
     Generates a signal that multiplies 2 sines.
     Note that multiplication of a signal causes 2 new frequencies. i.e. sin(x)sin(y) = (1/2)[cos(x-y)-cos(x+y)]
     """
-    time_int = 1/(30*max(f1,f2)) #30 points per oscillation. Based on higher frequency.
+    time_int = 1/(fS) #30 points per oscillation. Based on higher frequency.
     t = np.arange(0, duration, time_int)
 
     x  = np.sin(2*np.pi*f1*t)*np.sin(2*np.pi*f2*t)     # in-band
     #x += 0.2 * np.random.randn(len(t))    # noise
 
     return t, x
+
+def mult_ref(Wave_in,f_ref,duration,fS,ref = None):
+    time_int = 1/(fS) #30 points per oscillation. Based on higher frequency.
+    t = np.arange(0, duration, time_int)
+
+    if ref == 'cos':
+        x  = Wave_in*np.cos(2*np.pi*f_ref*t)     # in-band
+    elif ref == 'sin':
+        x  = Wave_in*np.sin(2*np.pi*f_ref*t)
+    else:
+        raise ValueError("Specify ref to be cos or sin for quadrature selection")
+    #x += 0.2 * np.random.randn(len(t))    # noise
+
+    return t, x
+
 
 
 # ===============================
@@ -83,6 +97,9 @@ def fir_filter(x, h):
     b = h
 
     y = signal.lfilter(b,a0,x)
+
+    return y
+
     # N = len(h)
     # y = np.zeros(len(x))
 
@@ -92,9 +109,6 @@ def fir_filter(x, h):
     #         if n-k >= 0:
     #             acc += h[k] * x[n-k]
     #     y[n] = acc
-
-    return y
-
 
 def plot_LPF_freq_response(upper_Freq,fS,h):
     # Plot the frequency response
