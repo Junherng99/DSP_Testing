@@ -39,7 +39,7 @@ def design_fir_lowpass(fS, fL, N):
 # ===============================
 
 ## Add 2 signals
-def generate_test_signal_add(f1,f2,duration,fS):
+def generate_test_signal_add(f1,f2,duration,fS, Ampl1 = 1, Ampl2 = 1):
     '''
     Generates a sine signal that adds f1 and f2.
     '''
@@ -48,15 +48,15 @@ def generate_test_signal_add(f1,f2,duration,fS):
     time_int = 1/(fS) #30 points per oscillation. Based on higher frequency.
     t = np.arange(0, duration, time_int)
 
-    x  = np.sin(2*np.pi*f1*t)    # in-band
-    x += np.sin(2*np.pi*f2*t)   # out-of-band
+    x  = Ampl1*np.sin(2*np.pi*f1*t)    # in-band
+    x += Ampl2*np.sin(2*np.pi*f2*t)   # out-of-band
     #x += 0.2 * np.random.randn(len(t))    # noise
 
 
     return t, x
 
 
-def generate_test_signal_mult(f1,f2,duration,fS):
+def generate_test_signal_mult(f1,f2,duration,fS,Ampl1 = 1, Ampl2 = 1):
     """
     Generates a signal that multiplies 2 sines.
     Note that multiplication of a signal causes 2 new frequencies. i.e. sin(x)sin(y) = (1/2)[cos(x-y)-cos(x+y)]
@@ -64,7 +64,7 @@ def generate_test_signal_mult(f1,f2,duration,fS):
     time_int = 1/(fS) #30 points per oscillation. Based on higher frequency.
     t = np.arange(0, duration, time_int)
 
-    x  = np.sin(2*np.pi*f1*t)*np.sin(2*np.pi*f2*t)     # in-band
+    x  = (Ampl1*np.sin(2*np.pi*f1*t))*(Ampl2*np.sin(2*np.pi*f2*t))     # in-band
     #x += 0.2 * np.random.randn(len(t))    # noise
 
     return t, x
@@ -113,15 +113,27 @@ def fir_filter(x, h):
 def plot_LPF_freq_response(upper_Freq,fS,h):
     # Plot the frequency response
     w, H = signal.freqz(h, worN = fS, fs=fS)
+    phase = np.angle(H)
+
     plt.figure(figsize=(10, 6))
+    plt.subplot(2,1,1)
+
     plt.plot(w, 20* np.log10(abs(H)))
     plt.xlim(0,upper_Freq)
     plt.ylim(-25,0)
     plt.title('Filter Frequency Response')
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Amplitude (dB)')
+
+    plt.subplot(2,1,2)
+    plt.plot(w, phase)
+    plt.title('FIR Filter Phase Response')
+    plt.xlabel('Frequency (radians/sample)')
+    plt.ylabel('Phase (radians)')
     plt.grid(True)
     plt.show()
+
+
 
 
 # Print coefficients in your Verilog-friendly format

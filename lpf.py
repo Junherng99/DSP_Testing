@@ -5,9 +5,9 @@ import scipy.signal as signal
 
 if (len(sys.argv)-1) not in (3, ):
     #config
-    fS = 1000000 #sampling rate
-    fL = 110000 #cutoff frequecy in Hz
-    N = 63 #Filter length. Must be odd
+    fS = 4000000 #sampling rate
+    fL = 230000 #cutoff frequecy in Hz
+    N = 127 #Filter length. Must be odd
 else:
     fS = int(sys.argv[1])
     fL = int(sys.argv[2])
